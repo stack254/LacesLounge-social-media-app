@@ -1,0 +1,39 @@
+{% extends 'social/base.html' %} {% block content %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ post.user.username }}</h5>
+    <p class="card-text">{{ post.content }}</p>
+    <p class="card-text">
+      <small class="text-muted">Posted on {{ post.created_at }}</small>
+    </p>
+    <form method="post" action="{% url 'like_post' post.id %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">
+        {% if user in post.likes.all %}Unlike{% else %}Like{% endif %} ({{
+        post.likes.count }})
+      </button>
+    </form>
+  </div>
+</div>
+
+<h2>Comments</h2>
+{% for comment in comments %}
+<div class="card mb-2">
+  <div class="card-body">
+    <h6 class="card-subtitle mb-2 text-muted">{{ comment.user.username }}</h6>
+    <p class="card-text">{{ comment.content }}</p>
+    <p class="card-text">
+      <small class="text-muted">Posted on {{ comment.created_at }}</small>
+    </p>
+  </div>
+</div>
+{% empty %}
+<p>No comments yet.</p>
+{% endfor %}
+
+<h3>Add a Comment</h3>
+<form method="post">
+  {% csrf_token %} {{ comment_form.as_p }}
+  <button type="submit" class="btn btn-primary">Comment</button>
+</form>
+{% endblock %}

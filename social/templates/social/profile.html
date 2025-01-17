@@ -1,0 +1,64 @@
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card profile-card">
+        <div class="card-body text-center">
+          {% if profile.avatar %}
+          <img
+            src="{{ profile.avatar.url }}"
+            alt="{{ profile.user.username }}'s avatar"
+            class="img-fluid rounded-circle profile-avatar mb-3" />
+          {% else %}
+          <img
+            src="{% static 'social/default.jpg' %}"
+            alt="Default avatar"
+            class="img-fluid rounded-circle profile-avatar mb-3" />
+          {% endif %}
+          <h2 class="card-title">{{ profile.user.username }}</h2>
+          {% if is_own_profile %}
+          <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm"
+            >Edit Profile</a
+          >
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title">About</h3>
+          <p class="card-text">
+            <strong>Bio:</strong> {{ profile.bio|default:"No bio provided" }}
+          </p>
+          <p class="card-text">
+            <strong>Location:</strong> {{ profile.location|default:"Not
+            specified" }}
+          </p>
+          {% if profile.birth_date %}
+          <p class="card-text">
+            <strong>Birth Date:</strong> {{ profile.birth_date }}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <h3 class="mt-4">Posts</h3>
+      {% for post in posts %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <p class="card-text">{{ post.content }}</p>
+          <a
+            href="{% url 'post_detail' post.id %}"
+            class="btn btn-outline-primary btn-sm"
+            >View Post</a
+          >
+        </div>
+      </div>
+      {% empty %}
+      <p class="text-muted">No posts yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
