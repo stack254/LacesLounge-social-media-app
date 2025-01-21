@@ -1,64 +1,457 @@
 {% extends 'social/base.html' %} {% load static %} {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-md-4">
-      <div class="card profile-card">
-        <div class="card-body text-center">
-          {% if profile.avatar %}
-          <img
-            src="{{ profile.avatar.url }}"
-            alt="{{ profile.user.username }}'s avatar"
-            class="img-fluid rounded-circle profile-avatar mb-3" />
-          {% else %}
-          <img
-            src="{% static 'social/default.jpg' %}"
-            alt="Default avatar"
-            class="img-fluid rounded-circle profile-avatar mb-3" />
-          {% endif %}
-          <h2 class="card-title">{{ profile.user.username }}</h2>
-          {% if is_own_profile %}
-          <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm"
-            >Edit Profile</a
-          >
-          {% endif %}
-        </div>
+<div class="container profile-container">
+  <div class="profile-card">
+    <div
+      class="profile-header"
+      style="background-image: url('{{ profile.cover_photo.url }}');">
+      <div class="profile-avatar">
+        <img
+          src="{{ profile.avatar.url }}"
+          alt="{{ profile.user.username }}'s avatar" />
       </div>
     </div>
-    <div class="col-md-8">
-      <div class="card">
-        <div class="card-body">
-          <h3 class="card-title">About</h3>
-          <p class="card-text">
-            <strong>Bio:</strong> {{ profile.bio|default:"No bio provided" }}
-          </p>
-          <p class="card-text">
-            <strong>Location:</strong> {{ profile.location|default:"Not
-            specified" }}
-          </p>
-          {% if profile.birth_date %}
-          <p class="card-text">
-            <strong>Birth Date:</strong> {{ profile.birth_date }}
-          </p>
-          {% endif %}
+    <div class="profile-body">
+      <h1 class="profile-name">{{ profile.user.username }}</h1>
+      <p class="profile-bio">{{ profile.bio }}</p>
+      <div class="profile-stats">
+        <div class="stat">
+          <span class="stat-value">{{ profile.post_count }}</span>
+          <span class="stat-label">Posts</span>
         </div>
-      </div>
-
-      <h3 class="mt-4">Posts</h3>
-      {% for post in posts %}
-      <div class="card mb-3">
-        <div class="card-body">
-          <p class="card-text">{{ post.content }}</p>
-          <a
-            href="{% url 'post_detail' post.id %}"
-            class="btn btn-outline-primary btn-sm"
-            >View Post</a
+        <div class="stat">
+          <span class="stat-value" id="followerCount"
+            >{{ follower_count }}</span
           >
+          <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ profile.following_count }}</span>
+          <span class="stat-label">Following</span>
         </div>
       </div>
-      {% empty %}
-      <p class="text-muted">No posts yet.</p>
-      {% endfor %}
+      {% if user.is_authenticated and user != profile_user %}
+      <a
+        href="{% url 'send_message' profile_user.username %}"
+        class="btn btn-primary"
+        >Send Message</a
+      >
+      <button
+        id="followButton"
+        class="btn {% if is_following %}btn-outline-primary{% else %}btn-primary{% endif %}">
+        {% if is_following %}Unfollow{% else %}Follow{% endif %}
+      </button>
+      {% else %}
+
+      <form
+        method="post"
+        action="{% url 'follow_unfollow' profile_user.username %}"
+        class="follow-form">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Follow</button>
+      </form>
+      {% endif %} {% if user == profile_user %}
+      <a href="{% url 'edit_profile' %}" class="btn btn-secondary"
+        >Edit Profile</a
+      >
+      {% endif %}
     </div>
   </div>
+
+  <div class="profile-posts">
+    <h2 class="section-title">Posts</h2>
+    {% for post in posts %}
+    <div class="post-card">
+      <div class="post-header">
+        <img
+          src="{{ post.user.profile.avatar.url }}"
+          alt="{{ post.user.username }}'s avatar"
+          class="post-avatar" />
+        <div class="post-info">
+          <h3 class="post-author">{{ post.user.username }}</h3>
+          <span class="post-date">{{ post.created_at|date:"F d, Y H:i" }}</span>
+        </div>
+      </div>
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+        {% if post.image %}
+        <div class="post-image-container">
+          <img src="{{ post.image.url }}" alt="Post image" class="post-image" />
+        </div>
+        {% endif %}
+      </div>
+      <div class="post-footer">
+        <div class="post-actions">
+          <button class="btn btn-like" data-post-id="{{ post.id }}">
+            <i class="fas fa-heart"></i>
+            <span class="like-count">{{ post.like_set.count }}</span>
+          </button>
+          <button class="btn btn-comment" data-post-id="{{ post.id }}">
+            <i class="fas fa-comment"></i>
+            <span class="comment-count">{{ post.comment_set.count }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <p class="no-posts">No posts yet.</p>
+    {% endfor %}
+  </div>
+  <style>
+      :root {
+        --primary-color: #4a90e2;
+        --secondary-color: #50e3c2;
+        --accent-color: #ff6b6b;
+        --background-color: #f4f7f9;
+        --text-color: #333;
+        --light-text-color: #666;
+      }
+
+      body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+      }
+
+      .profile-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .profile-card {
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+        transition: transform 0.3s ease;
+      }
+
+      .profile-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .profile-header {
+        height: 250px;
+        background-size: cover;
+        background-position: center;
+        position: relative;
+      }
+
+      .profile-avatar {
+        position: absolute;
+        bottom: -50px;
+        left: 30px;
+      }
+
+      .profile-avatar img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+      }
+
+      .profile-avatar img:hover {
+        transform: scale(1.05);
+      }
+
+      .profile-body {
+        padding: 80px 30px 30px;
+      }
+
+      .profile-name {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: var(--primary-color);
+      }
+
+      .profile-bio {
+        color: var(--light-text-color);
+        margin-bottom: 20px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+      }
+
+      .profile-stats {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 10px;
+        padding: 20px;
+        color: #fff;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+      }
+
+      .stat-label {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .btn {
+        padding: 12px 25px;
+        border-radius: 25px;
+        font-weight: bold;
+        text-transform: uppercase;
+        transition: all 0.3s ease;
+        letter-spacing: 1px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-secondary {
+        background-color: var(--accent-color);
+        border: none;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: #ff8787;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-outline-primary {
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        background-color: transparent;
+      }
+
+      .btn-outline-primary:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .section-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: var(--primary-color);
+        border-bottom: 3px solid var(--secondary-color);
+        padding-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+      }
+
+      .post-card {
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .post-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: #fff;
+    }
+
+    .post-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 2px solid #fff;
+    }
+
+    .post-info {
+      flex-grow: 1;
+    }
+
+    .post-author {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .post-date {
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    .post-content {
+      padding: 15px;
+    }
+
+    .post-image-container {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+
+    .post-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+
+    .post-image:hover {
+      transform: scale(1.05);
+    }
+
+    .post-footer {
+      padding: 10px 15px;
+      background-color: #f8f9fa;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .post-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-like,
+    .btn-comment {
+      background-color: transparent;
+      border: none;
+      color: var(--light-text-color);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s ease;
+    }
+
+    .btn-like:hover,
+    .btn-comment:hover {
+      color: var(--accent-color);
+    }
+      .no-posts {
+        text-align: center;
+        color: var(--light-text-color);
+        font-style: italic;
+        font-size: 1.2rem;
+        margin-top: 30px;
+      }
+
+      @media (max-width: 768px) {
+        .profile-header {
+          height: 200px;
+        }
+
+        .profile-avatar {
+          left: 50%;
+          transform: translateX(-50%);
+        }
+
+        .profile-body {
+          text-align: center;
+          padding-top: 100px;
+        }
+
+        .profile-stats {
+          flex-wrap: wrap;
+        }
+
+        .stat {
+          flex-basis: 33.33%;
+          margin-bottom: 15px;
+  </style>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const followButton = document.getElementById("followButton");
+      if (followButton) {
+        followButton.addEventListener("click", function () {
+          const isFollowing = this.classList.contains("btn-outline-primary");
+          const url = isFollowing
+            ? "{% url 'unfollow_user' %}"
+            : "{% url 'follow_user' %}";
+
+          fetch(url, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": "{{ csrf_token }}",
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: "username={{ profile_user.username }}",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.status === "success") {
+                this.textContent = isFollowing ? "Follow" : "Unfollow";
+                this.classList.toggle("btn-outline-primary");
+                this.classList.toggle("btn-primary");
+
+                // Update follower count
+                const followerCountElement =
+                  document.querySelector(".stat-value");
+                if (followerCountElement) {
+                  followerCountElement.textContent = data.follower_count;
+                }
+              }
+            })
+            .catch((error) => console.error("Error:", error));
+        });
+      }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      const followForm = document.querySelector(".follow-form");
+      if (followForm) {
+        followForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          fetch(this.action, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": this.querySelector(
+                'input[name="csrfmiddlewaretoken"]'
+              ).value,
+            },
+            body: new FormData(this),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const button = this.querySelector("button");
+              if (data.is_following) {
+                button.textContent = "Unfollow";
+                button.classList.remove("btn-primary");
+                button.classList.add("btn-outline-primary");
+              } else {
+                button.textContent = "Follow";
+                button.classList.remove("btn-outline-primary");
+                button.classList.add("btn-primary");
+              }
+            });
+        });
+      }
+    });
+  </script>
 </div>
-{% endblock %}
+{%endblock%}

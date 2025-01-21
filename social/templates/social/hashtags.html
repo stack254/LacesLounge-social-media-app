@@ -1,0 +1,39 @@
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container">
+  <h2>Posts with #{{ hashtag.name }}</h2>
+  {% for post in posts %}
+  <div class="post-card mb-4">
+    <div class="post-header">
+      <div class="d-flex align-items-center">
+        {% if post.user.profile.avatar %}
+        <img
+          src="{{ post.user.profile.avatar.url }}"
+          alt="{{ post.user.username }}"
+          class="avatar" />
+        {% else %}
+        <img
+          src="{% static 'images/default_avatar.png' %}"
+          alt="{{ post.user.username }}"
+          class="avatar" />
+        {% endif %}
+        <a href="{% url 'profile' post.user.username %}" class="username"
+          >{{ post.user.username }}</a
+        >
+      </div>
+      <small class="text-muted">{{ post.created_at|date:"F d, Y" }}</small>
+    </div>
+    <div class="post-content">{{ post.content|safe }}</div>
+    {% if post.image %}
+    <img src="{{ post.image.url }}" alt="Post image" class="img-fluid mb-3" />
+    {% endif %}
+    <div class="post-footer">
+      <a href="{% url 'post_detail' post.id %}" class="view-post"
+        >View Post <i class="fas fa-chevron-right"></i
+      ></a>
+    </div>
+  </div>
+  {% empty %}
+  <p>No posts found with this hashtag.</p>
+  {% endfor %}
+</div>
+{% endblock %}s

@@ -1,7 +1,79 @@
-{% extends 'social/base.html' %} {% block content %}
-<h1>Create a New Post</h1>
-<form method="post">
-  {% csrf_token %} {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Post</button>
-</form>
+{% extends 'social/base.html' %} {% load static %} {% block extra_head%}
+{%endblock%} {% block content %}
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="create-post-card">
+        <h2 class="text-center mb-4">Create a New Post</h2>
+        <form
+          method="post"
+          class="create-post-form"
+          enctype="multipart/form-data">
+          {% csrf_token %} {{form.as_p}}
+
+          <div class="text-center">
+            <button type="submit" class="btn btn-primary create-post-btn">
+              Post
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .create-post-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e0e5ec 100%);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+  }
+  .create-post-form input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  .create-post-card h2 {
+    color: #333;
+    font-weight: bold;
+  }
+
+  .create-post-form .form-group {
+    margin-bottom: 20px;
+  }
+
+  .create-post-form label {
+    font-weight: bold;
+    color: #555;
+  }
+
+  .create-post-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  .create-post-btn {
+    background-color: #43cea2;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .create-post-btn:hover {
+    background-color: #185a9d;
+    transform: translateY(-2px);
+  }
+</style>
 {% endblock %}

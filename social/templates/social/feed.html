@@ -1,0 +1,226 @@
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container">
+  <h2 class="feed-title mb-4">My Feed</h2>
+
+  {% if user.is_authenticated %}
+  <div class="feed-section">
+    <h3 class="section-title">Posts from Users You Follow</h3>
+    {% if followed_posts %} {% for post in followed_posts %}
+    <div class="post-card">
+      <div class="post-header">
+        <div class="user-info">
+          {% if post.user.profile.avatar %}
+          <img
+            src="{{ post.user.profile.avatar.url }}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% else %}
+          <img
+            src="{% static 'images/default_avatar.png' %}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% endif %}
+          <h4 class="username">
+            <a href="{% url 'profile' post.user.username %}"
+              >{{ post.user.username }}</a
+            >
+          </h4>
+        </div>
+        <small class="post-date">{{ post.created_at|date:"F d, Y" }}</small>
+      </div>
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+      </div>
+      <div class="post-footer">
+        <a href="{% url 'post_detail' post.id %}" class="view-details"
+          >View Details <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <p class="no-posts">
+      No posts from followed users yet. Start following some users to see their
+      posts here!
+    </p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="feed-section">
+    <h3 class="section-title">All Posts</h3>
+    {% if all_posts %} {% for post in all_posts %}
+    <div class="post-card">
+      <div class="post-header">
+        <div class="user-info">
+          {% if post.user.profile.avatar %}
+          <img
+            src="{{ post.user.profile.avatar.url }}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% else %}
+          <img
+            src="{% static 'images/default_avatar.png' %}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% endif %}
+          <h4 class="username">
+            <a href="{% url 'profile' post.user.username %}"
+              >{{ post.user.username }}</a
+            >
+          </h4>
+        </div>
+        <small class="post-date">{{ post.created_at|date:"F d, Y" }}</small>
+      </div>
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+      </div>
+      <div class="post-footer">
+        <a href="{% url 'post_detail' post.id %}" class="view-details"
+          >View Details <i class="fas fa-arrow-right"></i
+        ></a>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <p class="no-posts">No posts available. Be the first to create a post!</p>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .feed-title {
+    color: #333;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .feed-section {
+    margin-bottom: 3rem;
+  }
+
+  .section-title {
+    color: #555;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #43cea2;
+    padding-bottom: 0.5rem;
+  }
+
+  .post-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e0e5ec 100%);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+  }
+
+  .username {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+
+  .username a {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .username a:hover {
+    color: #43cea2;
+  }
+
+  .post-date {
+    color: #888;
+    font-size: 0.9rem;
+  }
+
+  .post-content {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .post-footer {
+    text-align: right;
+  }
+
+  .view-details {
+    color: #43cea2;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .view-details:hover {
+    color: #185a9d;
+  }
+
+  .view-details i {
+    margin-left: 5px;
+    transition: transform 0.3s ease;
+  }
+
+  .view-details:hover i {
+    transform: translateX(5px);
+  }
+
+  .no-posts {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .post-card {
+      padding: 20px;
+    }
+
+    .feed-title {
+      font-size: 2rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>
+{% endblock %}

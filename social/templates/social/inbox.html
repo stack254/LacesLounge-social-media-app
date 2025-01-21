@@ -1,0 +1,241 @@
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container">
+  <h2 class="inbox-title">Inbox</h2>
+
+  {% if messages_received %}
+  <div class="message-list">
+    {% for message in messages_received %}
+    <div class="message-card {% if not message.is_read %}unread{% endif %}">
+      <div class="message-header">
+        <img
+          src="{% if message.sender.profile.avatar %}{{ message.sender.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+          alt="{{ message.sender.username }}"
+          class="sender-avatar" />
+        <div class="message-info">
+          <h3 class="sender-name">{{ message.sender.username }}</h3>
+          <span class="message-date"
+            >{{ message.timestamp|date:"F d, Y H:i" }}</span
+          >
+        </div>
+        {% if not message.is_read %}
+        <span class="unread-badge">New</span>
+        {% endif %}
+      </div>
+      <div class="message-content">
+        <p>{{ message.content|truncatechars:100 }}</p>
+      </div>
+      <div class="message-actions">
+        <a href="{% url 'view_message' message.id %}" class="btn btn-primary"
+          >Read</a
+        >
+        <a
+          href="{% url 'send_message' message.sender.id %}"
+          class="btn btn-secondary"
+          >Reply</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-messages">
+    <i class="fas fa-inbox fa-3x"></i>
+    <p>No messages in your inbox.</p>
+  </div>
+  {% endif %}
+
+  <h2 class="inbox-title">Sent Messages</h2>
+
+  {% if messages_sent %}
+  <div class="message-list">
+    {% for message in messages_sent %}
+    <div class="message-card">
+      <div class="message-header">
+        <img
+          src="{% if message.recipient.profile.avatar %}{{ message.recipient.profile.avatar.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+          alt="{{ message.recipient.username }}"
+          class="sender-avatar" />
+        <div class="message-info">
+          <h3 class="sender-name">To: {{ message.recipient.username }}</h3>
+          <span class="message-date"
+            >{{ message.timestamp|date:"F d, Y H:i" }}</span
+          >
+        </div>
+      </div>
+      <div class="message-content">
+        <p>{{ message.content|truncatechars:100 }}</p>
+      </div>
+      <div class="message-actions">
+        <a href="{% url 'view_message' message.id %}" class="btn btn-primary"
+          >View</a
+        >
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="no-messages">
+    <i class="fas fa-paper-plane fa-3x"></i>
+    <p>No sent messages.</p>
+  </div>
+  {% endif %}
+</div>
+<style>
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .inbox-title {
+    color: #333;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .message-card {
+    background: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .message-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .message-card.unread {
+    border-left: 5px solid #43cea2;
+  }
+
+  .message-header {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e0e5ec 100%);
+  }
+
+  .sender-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+  }
+
+  .message-info {
+    flex-grow: 1;
+  }
+
+  .sender-name {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #333;
+  }
+
+  .message-date {
+    font-size: 0.9rem;
+    color: #777;
+  }
+
+  .unread-badge {
+    background-color: #43cea2;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+  }
+
+  .message-content {
+    padding: 15px;
+    color: #444;
+    line-height: 1.6;
+  }
+
+  .message-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 15px;
+    background-color: #f8f9fa;
+  }
+
+  .btn {
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn-primary {
+    background-color: #43cea2;
+    color: white;
+    margin-right: 10px;
+  }
+
+  .btn-primary:hover {
+    background-color: #3ab793;
+  }
+
+  .btn-secondary {
+    background-color: #6c757d;
+    color: white;
+  }
+
+  .btn-secondary:hover {
+    background-color: #5a6268;
+  }
+
+  .no-messages {
+    text-align: center;
+    padding: 50px 0;
+    color: #777;
+  }
+
+  .no-messages i {
+    margin-bottom: 20px;
+    color: #43cea2;
+  }
+
+  @media (max-width: 768px) {
+    .inbox-title {
+      font-size: 2rem;
+    }
+
+    .message-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .sender-avatar {
+      margin-bottom: 10px;
+    }
+
+    .message-actions {
+      flex-direction: column;
+    }
+
+    .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,39 +1,242 @@
-{% extends 'social/base.html' %} {% block content %}
-<div class="card mb-3">
-  <div class="card-body">
-    <h5 class="card-title">{{ post.user.username }}</h5>
-    <p class="card-text">{{ post.content }}</p>
-    <p class="card-text">
-      <small class="text-muted">Posted on {{ post.created_at }}</small>
-    </p>
-    <form method="post" action="{% url 'like_post' post.id %}">
-      {% csrf_token %}
-      <button type="submit" class="btn btn-primary">
-        {% if user in post.likes.all %}Unlike{% else %}Like{% endif %} ({{
-        post.likes.count }})
-      </button>
-    </form>
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="post-card mb-5">
+        <div class="post-header">
+          <div class="d-flex align-items-center">
+            {% if post.user.profile.avatar %}
+            <img
+              src="{{ post.user.profile.avatar.url }}"
+              alt="{{ post.user.username }}"
+              class="avatar" />
+            {% else %}
+            <img
+              src="{% static 'images/default_avatar.png' %}"
+              alt="{{ post.user.username }}"
+              class="avatar" />
+            {% endif %}
+            <div class="ml-3">
+              <h5 class="username mb-0">{{ post.user.username }}</h5>
+              <small class="text-muted"
+                >{{ post.created_at|date:"F d, Y H:i" }}</small
+              >
+            </div>
+          </div>
+        </div>
+        <div class="post-content mt-4">
+          <p class="lead">{{ post.content }}</p>
+          {% if post.image %}
+          <img
+            src="{{ post.image.url }}"
+            alt="Post image"
+            class="img-fluid rounded post-image" />
+          {% endif %}
+        </div>
+        <div class="post-footer mt-4">
+          <form
+            method="post"
+            action="{% url 'like_post' post.id %}"
+            class="like-form">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn btn-like {% if user in post.likes.all %}liked{% endif %}">
+              <i class="fas fa-heart"></i>
+              <span class="like-count">{{ post.likes.count }}</span>
+            </button>
+          </form>
+          <div class="comment-count">
+            <i class="fas fa-comment"></i>
+            <span>{{ comments.count }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="comments-section">
+        <h3 class="comments-header mb-4">Comments</h3>
+        {% for comment in comments %}
+        <div class="comment-card mb-3">
+          <div class="comment-header">
+            <div class="d-flex align-items-center">
+              {% if comment.user.profile.avatar %}
+              <img
+                src="{{ comment.user.profile.avatar.url }}"
+                alt="{{ comment.user.username }}"
+                class="avatar-small" />
+              {% else %}
+              <img
+                src="{% static 'images/default_avatar.png' %}"
+                alt="{{ comment.user.username }}"
+                class="avatar-small" />
+              {% endif %}
+              <div class="ml-2">
+                <h6 class="username-small mb-0">{{ comment.user.username }}</h6>
+                <small class="text-muted"
+                  >{{ comment.created_at|date:"F d, Y H:i" }}</small
+                >
+              </div>
+            </div>
+          </div>
+          <div class="comment-content mt-2">
+            <p>{{ comment.content }}</p>
+          </div>
+        </div>
+        {% empty %}
+        <p class="no-comments">No comments yet. Be the first to comment!</p>
+        {% endfor %}
+      </div>
+
+      <div class="add-comment-section mt-5">
+        <h4 class="mb-3">Add a Comment</h4>
+        <form method="post" class="comment-form">
+          {% csrf_token %}
+          <div class="form-group">{{ comment_form.content }}</div>
+          <button type="submit" class="btn btn-primary">Post Comment</button>
+        </form>
+      </div>
+    </div>
   </div>
 </div>
 
-<h2>Comments</h2>
-{% for comment in comments %}
-<div class="card mb-2">
-  <div class="card-body">
-    <h6 class="card-subtitle mb-2 text-muted">{{ comment.user.username }}</h6>
-    <p class="card-text">{{ comment.content }}</p>
-    <p class="card-text">
-      <small class="text-muted">Posted on {{ comment.created_at }}</small>
-    </p>
-  </div>
-</div>
-{% empty %}
-<p>No comments yet.</p>
-{% endfor %}
+<style>
+  body {
+    background-color: #f8f9fa;
+  }
 
-<h3>Add a Comment</h3>
-<form method="post">
-  {% csrf_token %} {{ comment_form.as_p }}
-  <button type="submit" class="btn btn-primary">Comment</button>
-</form>
+  .post-card {
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    transition: all 0.3s ease;
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .post-header {
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 15px;
+  }
+
+  .avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .avatar-small {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .username {
+    font-weight: 600;
+    color: #343a40;
+  }
+
+  .post-content {
+    font-size: 1.1em;
+    line-height: 1.6;
+    color: #343a40;
+  }
+
+  .post-image {
+    max-height: 500px;
+    width: 100%;
+    object-fit: cover;
+    margin-top: 20px;
+    border-radius: 10px;
+  }
+
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .btn-like {
+    background: none;
+    border: none;
+    color: #6c757d;
+    font-size: 1.2em;
+    transition: all 0.3s ease;
+  }
+
+  .btn-like:hover,
+  .btn-like.liked {
+    color: #dc3545;
+    transform: scale(1.1);
+  }
+
+  .comment-count {
+    color: #6c757d;
+    font-size: 1.2em;
+  }
+
+  .comments-header {
+    color: #343a40;
+    font-weight: 600;
+  }
+
+  .comment-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .comment-card:hover {
+    background: #e9ecef;
+  }
+
+  .username-small {
+    font-weight: 600;
+    color: #495057;
+  }
+
+  .no-comments {
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .add-comment-section {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .comment-form textarea {
+    border-radius: 10px;
+    resize: none;
+  }
+
+  .btn-primary {
+    background-color: #007bff;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  }
+</style>
+
+<script>
+  // Add any necessary JavaScript here
+</script>
 {% endblock %}

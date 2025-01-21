@@ -1,0 +1,53 @@
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-lg">
+        <div class="card-header bg-primary text-white">
+          <h2 class="mb-0">
+            <i class="fas fa-envelope mr-2"></i>
+            Send Message to {{ recipient.username }}
+          </h2>
+        </div>
+        <div class="card-body">
+          <form method="post" class="message-form">
+            {% csrf_token %}
+            <div class="form-group">
+              {{ form.content.label_tag }} {{ form.content }}
+            </div>
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+              <i class="fas fa-paper-plane mr-2"></i>Send Message
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .card {
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+  }
+  .card-header {
+    border-bottom: none;
+  }
+  .form-control {
+    border-radius: 10px;
+    resize: none;
+  }
+  .btn-primary {
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .message-form {
+    padding: 20px;
+  }
+</style>
+{% endblock %}

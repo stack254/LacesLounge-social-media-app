@@ -1,15 +1,225 @@
-{% extends 'social/base.html' %} {% block content %}
-<h1>Recent Posts</h1>
-{% for post in posts %}
-<div class="card mb-3">
-  <div class="card-body">
-    <h5 class="card-title">{{ post.user.username }}</h5>
-    <p class="card-text">{{ post.content }}</p>
-    <a href="{% url 'post_detail' post.id %}" class="btn btn-primary"
-      >View Post</a
-    >
+{% extends 'social/base.html' %} {% load static %} {% block content %}
+<div class="row">
+  <div class="col-md-8">
+    <h2 class="mb-4">Recent Posts</h2>
+    {% if posts %} {% for post in posts %}
+    <div class="post-card mb-4">
+      <div class="post-header">
+        <div class="d-flex align-items-center">
+          {% if post.user.profile.avatar %}
+          <img
+            src="{{ post.user.profile.avatar.url }}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% else %}
+          <img
+            src="{% static 'images/default_avatar.png' %}"
+            alt="{{ post.user.username }}"
+            class="avatar" />
+          {% endif %}
+          <a href="{% url 'profile' post.user.username %}" class="username"
+            >{{ post.user.username }}</a
+          >
+        </div>
+        <small class="text-muted">{{ post.created_at|date:"F d, Y" }}</small>
+      </div>
+      <div class="post-content">
+        <p>{{ post.content }}</p>
+        {% if post.image %}
+        <div class="post-image-container">
+          <img src="{{ post.image.url }}" alt="Post image" class="post-image" />
+        </div>
+        {% endif %}
+      </div>
+      <div class="post-card mb-4">
+        <div class="post-footer">
+          <div class="post-stats">
+            <span class="post-stat"
+              ><i class="fas fa-heart"></i> {{ post.likes.count }}</span
+            >
+            <span class="post-stat"
+              ><i class="fas fa-comment"></i> {{ post.comments.count }}</span
+            >
+          </div>
+          <a href="{% url 'post_detail' post.id %}" class="view-post">
+            View Post <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="alert alert-info" role="alert">
+      No posts yet. Be the first to share something!
+    </div>
+    {% endif %}
+  </div>
+  <div class="col-md-4">
+    <div class="create-post-card">
+      <h5>Create a New Post</h5>
+      <a href="{% url 'create_post' %}" class="create-post-btn">Create Post</a>
+    </div>
   </div>
 </div>
-{% empty %}
-<p>No posts yet.</p>
-{% endfor %} {% endblock %}
+
+<style>
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+  }
+
+  .col-md-8 {
+    flex: 0 0 66.666667%;
+    max-width: 66.666667%;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .col-md-4 {
+    flex: 0 0 33.333333%;
+    max-width: 33.333333%;
+    padding-right: 15px;
+    padding-left: 15px;
+  }
+
+  .post-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e0e5ec 100%);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin-bottom: 20px;
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+  }
+
+  .post-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+
+  .username {
+    margin: 0;
+    color: #333;
+    font-weight: bold;
+    text-decoration: none;
+  }
+
+  .post-content {
+    color: #444;
+    line-height: 1.6;
+    margin-bottom: 15px;
+  }
+
+  .post-image-container {
+    width: 100%;
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: 10px;
+    margin-top: 15px;
+  }
+
+  .post-image {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .post-image:hover {
+    transform: scale(1.05);
+  }
+
+  .post-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+  }
+
+  .post-stats {
+    display: flex;
+    gap: 15px;
+  }
+
+  .post-stat {
+    display: flex;
+    align-items: center;
+    color: #666;
+  }
+
+  .post-stat i {
+    margin-right: 5px;
+  }
+
+  .view-post {
+    color: rgb(207, 107, 107);
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+  }
+
+  .view-post i {
+    margin-left: 5px;
+  }
+
+  .view-post:hover {
+    color: #2980b9;
+  }
+
+  .create-post-card {
+    background: linear-gradient(135deg, #43cea2 0%, #185a9d 100%);
+    border-radius: 15px;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    position: sticky;
+    top: 20px;
+  }
+
+  .create-post-btn {
+    display: inline-block;
+    background-color: white;
+    color: #185a9d;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  .create-post-btn:hover {
+    background-color: #185a9d;
+    color: white;
+  }
+
+  @media (max-width: 768px) {
+    .col-md-8,
+    .col-md-4 {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    .create-post-card {
+      position: static;
+      margin-bottom: 20px;
+    }
+  }
+</style>
+{% endblock %}
