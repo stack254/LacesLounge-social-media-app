@@ -135,7 +135,7 @@ def like_post(request, post_id):
 def custom_logout(request):
     logout(request)
     messages.success(request, 'You have been successfully logged out.')
-    return redirect('social/home')
+    return redirect('social/home.html')
 
 @login_required
 def feed(request):
